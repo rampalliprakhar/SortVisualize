@@ -1,4 +1,5 @@
-import Visualize from "./VisualizeSort/page";
+import React from "react";
+import Visualize from "./VisualizeSort/Components/Visualize/Visualize";
 
 export default function Home() {
   return (

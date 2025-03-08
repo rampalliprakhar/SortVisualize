@@ -1,6 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import SortControls from "../Controls/SortControls";
+import Visualization from "../Visualization/Visualization";
+import ActionButton from "../ActionButton/ActionButton";
+import InputField from "../InputField/InputField";
+import Link from 'next/link';
 
 export default function Visualizer() {
   // State to hold the values that will be sorted
@@ -16,7 +21,7 @@ export default function Visualizer() {
   const [inputType, setInputType] = useState("numbers");
   
   // State to store the type of visualization (either 'bars' or 'array')
-  const [visualizationType, setVisualizationType] = useState("bars");
+  const [visualizationType, setVisualizationType] = useState("bars"); 
   
   // State to store the user input string
   const [inputString, setInputString] = useState("");
@@ -70,6 +75,26 @@ export default function Visualizer() {
         [updatedArray[i], updatedArray[minIndex]] = [updatedArray[minIndex], updatedArray[i]];
         setValues([...updatedArray]); // Update the values state for visualization
         await new Promise((resolve) => setTimeout(resolve, delay)); // Delay for visualization effect
+      }
+    }
+    setIsSorting(false); // Sorting is complete
+    setIsCompleted(true); // Mark as completed
+  };
+
+  // Bubble Sort algorithm (Async)
+  const bubbleSort = async (arr) => {
+    let updatedArray = [...arr]; // Create a copy of the array for sorting
+    for (let i = 0; i < updatedArray.length - 1; i++) {
+      for (let j = 0; j < updatedArray.length - i - 1; j++) {
+        if (
+          (inputType === "numbers" && updatedArray[j] > updatedArray[j + 1]) ||
+          (inputType === "alphabets" && updatedArray[j].localeCompare(updatedArray[j + 1]) > 0)
+        ) {
+          // Swap the elements if they are out of order
+          [updatedArray[j], updatedArray[j + 1]] = [updatedArray[j + 1], updatedArray[j]];
+          setValues([...updatedArray]); // Update the values state for visualization
+          await new Promise((resolve) => setTimeout(resolve, delay)); // Delay for visualization effect
+        }
       }
     }
     setIsSorting(false); // Sorting is complete
@@ -178,6 +203,11 @@ export default function Visualizer() {
 
   // Function to run the selected sorting algorithm
   const runSortingAlgorithm = () => {
+    if (values.length === 0) {
+      alert("Please provide input values first!");
+      return; // Prevent sorting if there are no values
+    }
+  
     if (!isSorting && !isCompleted) {
       setIsSorting(true); // Mark sorting as started
       setIsCompleted(false); // Reset completed state
@@ -193,6 +223,9 @@ export default function Visualizer() {
           break;
         case "quick":
           quickSort(values); // Run quick sort
+          break;
+        case "bubble":
+          bubbleSort(values); // Run bubble sort
           break;
         default:
           break;
@@ -230,103 +263,37 @@ export default function Visualizer() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="bg-white p-6 rounded-lg shadow-xl max-w-3xl w-full">
         <h1 className="text-4xl font-extrabold text-blue-500 text-center mb-8">Sorting Visualizer</h1>
+        
+        {/*Sorting Controls */}
+        <SortControls
+          sortingAlgorithm={sortingAlgorithm}
+          setSortingAlgorithm={setSortingAlgorithm}
+          inputType={inputType}
+          setInputType={setInputType}
+          setDelay={setDelay}
+          delay={delay}
+          visualizationType={visualizationType}
+          setVisualizationType={setVisualizationType}
+        />
+        
+        {/* Input Field for custom input */}
+        <InputField setValues={setValues} inputType={inputType} />
 
-        {/* Dropdown for selecting sorting algorithm */}
-        <div className="flex justify-center mb-4">
-          <select
-            className="bg-blue-600 text-white py-2 px-6 rounded-md"
-            onChange={(e) => setSortingAlgorithm(e.target.value)}
-            value={sortingAlgorithm}
-          >
-            <option value="selection">Selection Sort</option>
-            <option value="merge">Merge Sort</option>
-            <option value="insertion">Insertion Sort</option>
-            <option value="quick">Quick Sort</option>
-          </select>
-        </div>
-
-        {/* Dropdown for selecting numbers or alphabets */}
-        <div className="flex justify-center mb-4">
-          <select
-            className="bg-blue-600 text-white py-2 px-6 rounded-md"
-            onChange={(e) => setInputType(e.target.value)}
-            value={inputType}
-          >
-            <option value="numbers">Numbers (0 to n)</option>
-            <option value="alphabets">Alphabets (A to Z)</option>
-          </select>
-        </div>
-
-        {/* Input for custom values */}
-        <div className="flex justify-center mb-4">
-          <input
-            type="text"
-            className="bg-blue-600 text-white py-2 px-6 rounded-md"
-            placeholder={inputType === "numbers" ? "Enter numbers (e.g., 1, 3, 100)" : "Enter alphabets (e.g., A, B, C)"}
-            value={inputString}
-            onChange={(e) => setInputString(e.target.value)}
-          />
-        </div>
-
-        {/* Delay input to adjust speed */}
-        <div className="flex justify-center mb-4">
-          <input
-            type="number"
-            className="bg-blue-600 text-white py-2 px-6 rounded-md"
-            placeholder="Delay in ms"
-            value={isNaN(delay) ? "" : delay} // Only pass a valid delay
-            onChange={handleDelayChange}
-            min="10"
-          />
-        </div>
-
-        {/* Toggle between Array View and Bar Chart View */}
-        <div className="flex justify-center mb-4">
-          <button
-            className="bg-blue-600 text-white py-2 px-6 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-300 transition"
-            onClick={() => setVisualizationType(visualizationType === "bars" ? "array" : "bars")}
-          >
-            {visualizationType === "bars" ? "Switch to Array View" : "Switch to Bar Chart View"}
-          </button>
-        </div>
-
-        {/* Start or Restart Sorting Button */}
-        <div className="flex justify-center mb-4">
-          <button
-            className={`bg-blue-600 text-white py-2 px-6 rounded-md ${isSorting || isCompleted ? "cursor-not-allowed opacity-50" : "hover:bg-blue-700"} focus:outline-none focus:ring-4 focus:ring-blue-300 transition`}
-            onClick={isCompleted ? restartSorting : runSortingAlgorithm} // Change button action based on sorting completion
-            disabled={isSorting && !isCompleted} // Disable button while sorting
-          >
-            {isSorting
-              ? "Sorting..."
-              : isCompleted
-              ? "Restart" // Changes to "Restart" once sorting is completed
-              : "Start Sorting"}
-          </button>
-        </div>
+        {/* ActionButton for Start or Restart Sorting Button */}
+        <ActionButton
+          isSorting={isSorting}
+          isCompleted={isCompleted}
+          runSortingAlgorithm={runSortingAlgorithm}
+          restartSorting={restartSorting}
+        />
 
         {/* Visualization */}
-        <div className="flex justify-center mb-8">
-          {visualizationType === "bars" ? (
-            <div className="w-full max-w-3xl h-96 flex items-end justify-center space-x-1">
-              {values.map((value, index) => (
-                <div
-                  key={index}
-                  style={{
-                    height: `${normalizeValue(value)}%`,
-                    width: "10px",
-                    backgroundColor: "#00ff00",
-                    marginBottom: "2px",
-                  }}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="w-full max-w-3xl h-96 flex justify-center items-center">
-              <div className="text-xl font-bold">{values.join(" | ")}</div>
-            </div>
-          )}
-        </div>
+        <Visualization
+          values={values}
+          inputType={inputType}
+          visualizationType={visualizationType}
+          normalizeValue={normalizeValue}
+        />
       </div>
     </div>
   );
