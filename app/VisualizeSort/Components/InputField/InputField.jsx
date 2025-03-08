@@ -2,9 +2,11 @@ import React, { useState } from "react";
 
 const InputField = ({ setValues, inputType }) => {
   const [userInput, setUserInput] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (e) => {
     setUserInput(e.target.value);
+    setErrorMessage("");
   };
 
   // Function to handle the input submission
@@ -17,14 +19,22 @@ const InputField = ({ setValues, inputType }) => {
         .split(",")
         .map((val) => parseInt(val.trim(), 10))
         .filter((val) => !isNaN(val));
+        if(newValues.length === 0){
+          setErrorMessage("Please enter valid numbers!!");
+        } else {
+          setValues(newValues);
+        }
     } else {
       // If inputType is 'alphabets', convert input to an array of characters
-      newValues = userInput.split(",").map((val) => val.trim().toUpperCase());
-    }
-
-    // Update the state with the new values (if valid input)
-    if (newValues.length > 0) {
-      setValues(newValues);
+      newValues = userInput
+        .split(",")
+        .map((val) => val.trim().toUpperCase())
+        .filter((val) => /^[A-Z]$/.test(val));
+      if (newValues.length === 0){
+        setErrorMessage("Please enter valid alphabets!!");
+      } else {
+        setValues(newValues);
+      }
     }
   };
 
@@ -70,6 +80,7 @@ const InputField = ({ setValues, inputType }) => {
       >
         Generate Random {inputType === "numbers" ? "Numbers" : "Alphabets"}
       </button>
+      {errorMessage && <p className="text-red-600 mt-2">{errorMessage}</p>}
     </div>
   );
 };

@@ -243,12 +243,20 @@ export default function Visualizer() {
 
   // Function to normalize values for visualization (for bars and arrays)
   const normalizeValue = (value) => {
-    const maxValue = Math.max(...values.map((v) => (inputType === "numbers" ? v : v.charCodeAt(0))));
-    const minValue = Math.min(...values.map((v) => (inputType === "numbers" ? v : v.charCodeAt(0))));
-    const range = maxValue - minValue;
-    return range === 0 ? 1 : ((inputType === "numbers" ? value : value.charCodeAt(0)) - minValue) / range * 100;
+    // If the value is a string
+    if (typeof value === 'string') {
+      return (value.charCodeAt(0) - 65) / (90 - 65) * 100; // Values are uppercase letters A-Z
+    }
+    
+    // If the value is a number
+    if (typeof value === 'number') {
+      const maxValue = Math.max(...values); // Get the max value from the list
+      return (value / maxValue) * 100; // Normalize number as a percentage
+    }
+  
+    // Return a default value
+    return 0;
   };
-
   // Function to handle delay input change
   const handleDelayChange = (e) => {
     const newDelay = parseInt(e.target.value, 10);
