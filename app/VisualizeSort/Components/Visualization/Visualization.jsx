@@ -1,19 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
-const Visualization = ({ values, visualizationType, normalizeValue, highlightedIndices = [] }) => {
-  // Generate initial positions based on array indices
-  const [positions, setPositions] = useState(values.map((_, index) => index));
-
-  useEffect(() => {
-    setPositions(values.map((_, index) => index)); // Reset positions when values change
-  }, [values]);
-
+const Visualization = ({ values, positions, visualizationType, normalizeValue, highlightedIndices = [] }) => {
   return (
     <div className="flex justify-center mb-8 relative h-96 border-4 border-dashed border-blue-500 rounded-lg">
       {visualizationType === "bars" ? (
         <div className="relative flex items-end justify-center space-x-1 w-full max-w-3xl">
           {values.map((value, index) => {
-            // Calculate the left position 
+            // Find the current index's position for animation
             const leftPosition = positions[index] * 35;
 
             // Check if the current index is highlighted
@@ -22,27 +15,33 @@ const Visualization = ({ values, visualizationType, normalizeValue, highlightedI
             return (
               <div
                 key={index}
-                className={`flex items-end justify-center absolute transition-all duration-300`}
+                className={`absolute transition-all duration-500 ${isHighlighted ? 'bg-red-500' : ''}`}
                 style={{
-                  height: `${normalizeValue(value)}%`,
-                  left: `${leftPosition}px`,
+                  alignItems:"center",
+                  backgroundColor: isHighlighted ? "#ff5733" : "#00ff00",
                   bottom: 0,
+                  display: "flex",
+                  flexDirection: "column",
+                  height: `${Math.max(normalizeValue(value), 20)}px`,
+//                  height: `${Math.max(value * 3, 30)}px`,
+                  justifyContent:"flex-end",
+                  left: `${leftPosition}px`,
+                  position: "absolute",
+                  transition: "left 0.5s ease-in-out",
                   width: "30px",
-                  transition: "all 0.5s ease-in-out",
-                  position: "absolute"
                 }}
               >
-                <div
+                <span 
                   style={{
-                    backgroundColor: isHighlighted ? "#ff5733" : "#00ff00",  
-                    height: '100%',
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "flex-end",
+                    bottom:"2px",
+                    color: normalizeValue * 3 < 20 ? "black":"white",
+                    fontSize: "14px",
+                    fontWeight: "bold",
+                    position: "absolute",
+                    textAlign:"center",
+                    width:"100%"
                   }}
-                >
-                  <span style={{ marginBottom: "5px", color: "#202020" }}>{value}</span>
-                </div>
+                >{value}</span>
               </div>
             );
           })}
@@ -59,13 +58,9 @@ const Visualization = ({ values, visualizationType, normalizeValue, highlightedI
                   key={index}
                   className={`px-2 py-1 mx-1 rounded-md transition-all duration-500 ${isHighlighted ? 'bg-red-500 text-white' : 'bg-gray-200'}`}
                   style={{
-                    backgroundColor: '#f0f0f0', 
                     border: '1px solid #ccc', 
                     borderRadius: '4px', 
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)', 
-                    display: 'inline-block', 
-                    fontSize: '18px', 
-                    fontWeight: 'bold', 
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',  
                     minWidth: '40px',
                     padding: '8px 12px', 
                     textAlign: 'center',
