@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-const InputField = ({ setValues, setIsSorting, inputType, setIsCompleted }) => {
+const InputField = ({ setValues, inputType }) => {
   const [userInput, setUserInput] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
@@ -39,25 +39,10 @@ const InputField = ({ setValues, setIsSorting, inputType, setIsCompleted }) => {
   };
 
   // Function to generate a random array based on the input type
-  const generateRandomArray = () => {  
-    setIsSorting(false);  // Reset sorting state
-    setIsCompleted(false); // Ensure sorting can restart
-  
-    let randomValues = [];
-    const arrayLength = 10;
-  
-    if (inputType === "numbers") {
-      for (let i = 0; i < arrayLength; i++) {
-        randomValues.push(Math.floor(Math.random() * 100));
-      }
-    } else {
-      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-      for (let i = 0; i < arrayLength; i++) {
-        randomValues.push(alphabet[Math.floor(Math.random() * alphabet.length)]);
-      }
+  const generateRandomArray = () => {
+    if (typeof window.generateRandomNumbers === "function") {
+      window.generateRandomNumbers();
     }
-  
-    setValues(randomValues);
   };
  
   return (

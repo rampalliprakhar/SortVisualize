@@ -40,14 +40,31 @@ export default function Visualizer() {
   }, [values]);
 
   useEffect(() => {
-    generateRandomNumbers();
-  }, []);
+    window.generateRandomNumbers = generateRandomNumbers;
+  }, [inputType]);
 
   const generateRandomNumbers = () => {
     if (isSorting) return; // Prevent generating while sorting
-    const newValues = Array.from({ length: 10 }, () => Math.floor(Math.random() * 100) + 1);
-    setValues(newValues);
-    setPositions(newValues.map((_, index) => index));
+  
+    setIsSorting(false);
+    setIsCompleted(false);
+  
+    let randomValues = [];
+    const arrayLength = 10;
+  
+    console.log("Current inputType:", inputType);
+  
+    if (inputType === "numbers") {
+      randomValues = Array.from({ length: arrayLength }, () => Math.floor(Math.random() * 100) + 1);
+    } else if (inputType === "alphabets") {
+      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      randomValues = Array.from({ length: arrayLength }, () => alphabet[Math.floor(Math.random() * alphabet.length)]);
+    } else {
+      console.warn("Invalid inputType:", inputType);
+    }
+  
+    setValues(randomValues);
+    setPositions(randomValues.map((_, index) => index));
     setHighlightedIndices([]);
   };
 
@@ -75,22 +92,13 @@ export default function Visualizer() {
   }, [inputString, inputType]);
 
   // Sorting algorithms (Selection, Merge, Insertion, Quick)
-  const swap = (arr, i, j) => {
+  const swap = (arr, positions, i, j) => {
     [arr[i], arr[j]] = [arr[j], arr[i]]; // Swap values
-  
-    let newPositions = [...positions];
-    [newPositions[i], newPositions[j]] = [newPositions[j], newPositions[i]]; // Swap positions
-    setPositions(newPositions);
-  };
-
-  const updateState = async (arr, pos, delay) => {
-    setValues([...arr]);
-    setPositions([...pos]);
-    await new Promise((resolve) => setTimeout(resolve, delay));
+    [positions[i], positions[j]] = [positions[j], positions[i]]; // Swap positions
   };
   
   const selectionSort = async (arr) => {
-    let sortedArray = [...arr];
+    let sortedArray = [...values];
     let pos = [...positions];
   
     for (let i = 0; i < sortedArray.length - 1; i++) {
@@ -102,9 +110,7 @@ export default function Visualizer() {
       }
   
       if (minIndex !== i) {
-        swap(sortedArray, i, minIndex);
-        swap(pos, i, minIndex);
-  
+        swap(sortedArray, pos, i, minIndex);  
         setHighlightedIndices([i, minIndex]);
         setValues([...sortedArray]); 
         setPositions([...pos]); 
@@ -337,15 +343,6 @@ export default function Visualizer() {
     // Return a default value
     return 0;
   };
-  // Function to handle delay input change
-  const handleDelayChange = (e) => {
-    const newDelay = parseInt(e.target.value, 10);
-    if (!isNaN(newDelay)) {
-      setDelay(newDelay); // Set the new delay value
-    } else {
-      setDelay(100); // Reset to default value if the input is invalid
-    }
-  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -368,8 +365,8 @@ export default function Visualizer() {
         <InputField 
           setValues={setValues} 
           inputType={inputType}
-          setIsSorting={setIsSorting}  
-          setIsCompleted={setIsCompleted}
+          // setIsSorting={setIsSorting}  
+          // setIsCompleted={setIsCompleted}
         />
 
         {/* ActionButton for Start or Restart Sorting Button */}
@@ -383,8 +380,10 @@ export default function Visualizer() {
         {/* Visualization */}
         <Visualization
           values={values}
+          positions={positions}
           inputType={inputType}
           visualizationType={visualizationType}
+          highlightedIndices={highlightedIndices}
           normalizeValue={normalizeValue}
         />
       </div>
