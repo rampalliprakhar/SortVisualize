@@ -1,6 +1,6 @@
 import React from 'react'
 
-const SortControls = ({ sortingAlgorithm, setSortingAlgorithm, inputType, setInputType, setDelay, delay, visualizationType, setVisualizationType }) => {
+const SortControls = ({ sortingAlgorithm, setSortingAlgorithm, inputType, setInputType, setDelay, delay, visualizationType, setVisualizationType, theme, setTheme }) => {
   return (
     <div className='flex flex-col items-center mb-4 space-y-4'>
         {/* Dropdown for selecting sorting algorithm */}
@@ -45,6 +45,18 @@ const SortControls = ({ sortingAlgorithm, setSortingAlgorithm, inputType, setInp
         >
             <option value="bars">Bars</option>
             <option value="array">Array</option>
+        </select>
+        
+        {/* Dropdown to choose a theme */}
+        <select
+            className='bg-blue-600 text-white py-2 px-6 rounded-md'
+            onChange={(e) => setTheme(e.target.value)}
+            value={theme}
+        >
+            <option value="default">Default</option>
+            <option value="dark">Dark Mode</option>
+            <option value="pastel">Pastel Colors</option>
+            <option value="neon">Neon Theme</option>
         </select>
     </div>
   )

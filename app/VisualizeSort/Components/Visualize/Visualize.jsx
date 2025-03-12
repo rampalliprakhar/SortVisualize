@@ -35,6 +35,8 @@ export default function Visualizer() {
 
   const [highlightedIndices, setHighlightedIndices] = useState([]);
 
+  const [theme, setTheme] = useState("default");
+
   useEffect(() => {
     setPositions(values.map((_, index) => index)); // Reset positions when values change
   }, [values]);
@@ -95,6 +97,9 @@ export default function Visualizer() {
   const swap = (arr, positions, i, j) => {
     [arr[i], arr[j]] = [arr[j], arr[i]]; // Swap values
     [positions[i], positions[j]] = [positions[j], positions[i]]; // Swap positions
+
+    setValues([...arr]);
+    setPositions([...positions]);
   };
   
   const selectionSort = async (arr) => {
@@ -356,6 +361,7 @@ export default function Visualizer() {
           inputType={inputType}
           setInputType={setInputType}
           setDelay={setDelay}
+          setTheme={setTheme}
           delay={delay}
           visualizationType={visualizationType}
           setVisualizationType={setVisualizationType}
@@ -385,6 +391,7 @@ export default function Visualizer() {
           visualizationType={visualizationType}
           highlightedIndices={highlightedIndices}
           normalizeValue={normalizeValue}
+          theme={theme}
         />
       </div>
     </div>

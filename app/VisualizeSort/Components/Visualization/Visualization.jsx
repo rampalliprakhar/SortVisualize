@@ -1,47 +1,49 @@
-import React from 'react';
+import React from "react";
 
-const Visualization = ({ values, positions, visualizationType, normalizeValue, highlightedIndices = [] }) => {
+const Visualization = ({ values, positions, visualizationType, normalizeValue, highlightedIndices, theme = [] }) => {
+  const getThemeColors = (theme) => {
+    switch (theme) {
+      case "dark":
+        return { barColor: "#3498db", textColor: "#ecf0f1", bgColor: "#2c3e50" };
+      case "pastel":
+        return { barColor: "#f8b195", textColor: "#355c7d", bgColor: "#f8f1f1" };
+      case "neon":
+        return { barColor: "#39ff14", textColor: "#ff00ff", bgColor: "#000000" };
+      default:
+        return { barColor: "#00ff00", textColor: "#202020", bgColor: "#ffffff" };
+    }
+  };
+
+  const { barColor, textColor } = getThemeColors(theme);
+
   return (
     <div className="flex justify-center mb-8 relative h-96 border-4 border-dashed border-blue-500 rounded-lg">
-      {visualizationType === "bars" ? (
-        <div className="relative flex items-end justify-center space-x-1 w-full max-w-3xl">
+    {visualizationType === "bars" ? (
+      <div className="relative flex items-end justify-center space-x-1 w-full max-w-3xl">
           {values.map((value, index) => {
-            // Find the current index's position for animation
             const leftPosition = positions[index] * 35;
 
-            // Check if the current index is highlighted
             const isHighlighted = highlightedIndices.includes(index);
 
             return (
               <div
                 key={index}
-                className={`absolute transition-all duration-500 ${isHighlighted ? 'bg-red-500' : ''}`}
+                className={`absolute transition-all duration-500 ${
+                  isHighlighted ? 'bg-red-500' : ''
+                }`}
                 style={{
-                  alignItems:"center",
-                  backgroundColor: isHighlighted ? "#ff5733" : "#00ff00",
-                  bottom: 0,
-                  display: "flex",
-                  flexDirection: "column",
-                  height: `${Math.max(normalizeValue(value), 20)}px`,
-//                  height: `${Math.max(value * 3, 30)}px`,
-                  justifyContent:"flex-end",
                   left: `${leftPosition}px`,
-                  position: "absolute",
-                  transition: "left 0.5s ease-in-out",
+                  bottom: 0,
                   width: "30px",
+                  height: `${Math.max(value * 3, 20)}px`,
+                  backgroundColor: isHighlighted ? "#ff5733" : barColor,
+                  color: textColor,
+                  transition: "left 0.5s ease-in-out",
                 }}
               >
-                <span 
-                  style={{
-                    bottom:"2px",
-                    color: normalizeValue * 3 < 20 ? "black":"white",
-                    fontSize: "14px",
-                    fontWeight: "bold",
-                    position: "absolute",
-                    textAlign:"center",
-                    width:"100%"
-                  }}
-                >{value}</span>
+                <span style={{ color: textColor, fontWeight: "bold", fontSize: "14px" }}>
+                  {value}
+                </span>
               </div>
             );
           })}
