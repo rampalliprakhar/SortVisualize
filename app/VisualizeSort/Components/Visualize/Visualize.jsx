@@ -95,20 +95,39 @@ export default function Visualizer() {
 
   // Sorting algorithms (Selection, Merge, Insertion, Quick)
   const swap = async(arr, positions, i, j, setValues, setPositions, setHighlightedIndices, delay) => {
-    // Highlight elements being swapped
-    setHighlightedIndices([i,j]);
- 
-    // Swap values in the array
-    [arr[i], arr[j]] = [arr[j], arr[i]]; // Swap values
-    [positions[i], positions[j]] = [positions[j], positions[i]]; // Swap positions
+    return new Promise((resolve) => {
+      // Highlight elements being swapped
+      setHighlightedIndices([i,j]);
 
-    // Updating state to reflect changes
-    setValues([...arr]);
-    setPositions([...positions]);
+      const bar1 = document.querySelector(`[data-index="${i}"]`);
+      const bar2 = document.querySelector(`[data-index="${j}"]`);
 
-    // Waiting before resetting highlighting
-    await new Promise((resolve) => setTimeout(resolve, delay));
-    setHighlightedIndices([]);
+      if (bar1 && bar2){
+        const bar1X = bar1.style.transform;
+        const bar2X = bar2.style.transform;
+
+        // Visually swapping positions
+        bar1.style.transform = `${bar2X} rotateY(20deg)`;
+        bar2.style.transform = `${bar1X} rotateY(20deg)`;
+
+        // Delay
+        setTimeout(()=>{
+          // Swap values in the array
+          [arr[i], arr[j]] = [arr[j], arr[i]]; // Swap values
+          [positions[i], positions[j]] = [positions[j], positions[i]]; // Swap positions
+
+          // Updating state to reflect changes
+          setValues([...arr]);
+          setPositions([...positions]);
+          setHighlightedIndices([]);
+
+          resolve();
+        }, delay);
+      }
+      else{
+        resolve();
+      }
+    });
   };
   
   const selectionSort = async (arr, positions, setValues, setPositions, setHighlightedIndices, delay) => {
@@ -122,11 +141,26 @@ export default function Visualizer() {
       }
   
       if (minIndex !== i) {
-        await swap(arr, positions, i, minIndex, setValues, setPositions, setHighlightedIndices, delay);
+        //await swap(arr, positions, i, minIndex, setValues, setPositions, setHighlightedIndices, delay);
+        // Highlight the elements being swapped
+        setHighlightedIndices([i, minIndex]);
+
+        // Swap the values
+        [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];
+        [positions[i], positions[minIndex]] = [positions[minIndex], positions[i]];
+
+        // Updating visualization
+        setValues([...arr]);
+        setPositions([...positions]);
+
+        // Wait to visualize the swap
+        await new Promise((resolve) => setTimeout(resolve, delay));
+
+        // Remove highlights
+        setHighlightedIndices([]);
       }
     }
-  
-//    setHighlightedIndices([]);
+    
     setIsSorting(false);
     setIsCompleted(true);
   };

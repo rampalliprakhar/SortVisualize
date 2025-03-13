@@ -21,26 +21,30 @@ const Visualization = ({ values, positions, visualizationType, normalizeValue, h
       {visualizationType === "bars" ? (
         <div className="relative flex-wrap items-start space-x-1 w-full max-w-3xl overflow-hidden">
           {values.map((value, index) => {
-            const leftPosition = positions[index] * 35;
+            //const leftPosition = positions[index] * 35;
             const isHighlighted = highlightedIndices.includes(index);
+            const maxHeight = Math.max(...values);
+            const heightPercentage = (value / maxHeight) * 100;
 
             return (
               <div
                 key={index}
-                className={`bar absolute transition-transform duration-500 ${
-                  isHighlighted ? "bg-red-500" : ""
-                }`}
-                data-value={value}
+                className= "bar absolute"
+                data-index={index}
                 style={{
                   alignItems: "center",
                   backgroundColor: isHighlighted ? "#ff5733" : barColor,
+                  borderRadius: "4px",
                   bottom: 0,
                   color: textColor,
                   display: "flex",
                   flexDirection: "column",
-                  height: `${Math.max(normalizeValue(value), 40)}px`,
+                  fontSize: "12px",
+                  fontWeight: "bold",
+                  height: `${Math.max(heightPercentage, 5)}%`,
                   justifyContent: "flex-end",
-                  transform: `translateX(${leftPosition}px)`,
+                  position: "absolute",
+                  transform: `translateX(${positions[index] * 35}px) rotateY(${isHighlighted ? "15deg" : "0deg"})`,
                   transition: "transform 0.5s ease-in-out",
                   width: "30px",
                 }}
@@ -76,10 +80,10 @@ const Visualization = ({ values, positions, visualizationType, normalizeValue, h
                     border: "1px solid #ccc",
                     minWidth: "20px",
                     padding: "8px 10px",
-                    textAlign: "left",
+                    textAlign: "center",
                     fontSize: "clamp(12px, 3vw, 18px)", 
-                    transform: `translateX(${positions[index] * 50}px)`, 
-                    transition: "transform 0.5s ease-in-out",
+                    order: positions[index], 
+                    transition: "order 0.5s ease-in-out",
                   }}
                 >
                   {value}
