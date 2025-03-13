@@ -49,25 +49,26 @@ const Visualization = ({ values, positions, visualizationType, normalizeValue, h
           })}
         </div>
       ) : (
-        <div className="w-full max-w-3xl h-96 flex justify-center items-center border-4 border-dashed border-blue-500 rounded-lg">
-          <div className="text-xl font-bold flex space-x-2">
+        <div className="w-full max-w-3xl h-auto flex justify-center items-center border-4 border-dashed border-blue-500 rounded-lg p-4 overflow-x-auto">
+          <div className="text-lg font-bold flex flex-nowrap gap-2 justify-center">
             {values.map((value, index) => {
-              // Check if the current element is highlighted 
               const isHighlighted = highlightedIndices.includes(index);
 
               return (
                 <div
                   key={index}
-                  className={`px-2 py-1 mx-1 rounded-md transition-all duration-500 ${isHighlighted ? 'bg-red-500 text-white' : 'bg-gray-200'}`}
+                  className={`px-2 py-1 rounded-md transition-all duration-500 ${
+                    isHighlighted ? "bg-red-500 text-white" : "bg-gray-200"
+                  }`}
                   style={{
-                    border: '1px solid #ccc', 
-                    borderRadius: '4px', 
-                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',  
-                    minWidth: '40px',
-                    padding: '8px 12px', 
-                    textAlign: 'center',
+                    border: "1px solid #ccc",
+                    minWidth: "40px",
+                    padding: "8px 12px",
+                    textAlign: "center",
+                    fontSize: "clamp(12px, 3vw, 18px)", 
                     transform: isHighlighted ? "scale(1.1)" : "scale(1)",
-                    transition: 'transform 0.3s ease-in-out',  
+                    transition: "transform 0.3s ease-in-out",
+                    whiteSpace: "nowrap",
                   }}
                 >
                   {value}
