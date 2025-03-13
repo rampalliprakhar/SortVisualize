@@ -94,44 +94,40 @@ export default function Visualizer() {
   }, [inputString, inputType]);
 
   // Sorting algorithms (Selection, Merge, Insertion, Quick)
-  const swap = async(arr, positions, i, j, setValues, setPositions, setHighlightedIndices, delay) => {
+  const swap = async (arr, positions, i, j, setValues, setPositions, setHighlightedIndices, delay) => {
     return new Promise((resolve) => {
       // Highlight elements being swapped
-      setHighlightedIndices([i,j]);
-
+      setHighlightedIndices([i, j]);
+  
       const bar1 = document.querySelector(`[data-index="${i}"]`);
       const bar2 = document.querySelector(`[data-index="${j}"]`);
-
-      if (bar1 && bar2){
-        const bar1X = bar1.style.transform;
-        const bar2X = bar2.style.transform;
-
-        // Visually swapping positions
-        bar1.style.transform = `${bar2X} rotateY(20deg)`;
-        bar2.style.transform = `${bar1X} rotateY(20deg)`;
-
-        // Delay
-        setTimeout(()=>{
-          // Swap values in the array
-          [arr[i], arr[j]] = [arr[j], arr[i]]; // Swap values
-          [positions[i], positions[j]] = [positions[j], positions[i]]; // Swap positions
-
-          // Updating state to reflect changes
+  
+      if (bar1 && bar2) {
+        // Temporarily update to visually swap the elements
+        bar1.style.order = j;
+        bar2.style.order = i;
+  
+        // Delay the actual state update
+        setTimeout(() => {
+          // Swap values and positions in the array
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+          [positions[i], positions[j]] = [positions[j], positions[i]];
+  
+          // Update state to reflect the changes
           setValues([...arr]);
           setPositions([...positions]);
+  
+          // Reset the highlighted columns
           setHighlightedIndices([]);
-
           resolve();
         }, delay);
-      }
-      else{
+      } else {
         resolve();
       }
     });
   };
   
   const selectionSort = async (arr, positions, setValues, setPositions, setHighlightedIndices, delay) => {
-
     for (let i = 0; i < arr.length - 1; i++) {
       let minIndex = i;
       for (let j = i + 1; j < arr.length; j++) {
@@ -141,64 +137,38 @@ export default function Visualizer() {
       }
   
       if (minIndex !== i) {
-        //await swap(arr, positions, i, minIndex, setValues, setPositions, setHighlightedIndices, delay);
-        // Highlight the elements being swapped
-        setHighlightedIndices([i, minIndex]);
-
-        // Swap the values
-        [arr[i], arr[minIndex]] = [arr[minIndex], arr[i]];
-        [positions[i], positions[minIndex]] = [positions[minIndex], positions[i]];
-
-        // Updating visualization
-        setValues([...arr]);
-        setPositions([...positions]);
-
-        // Wait to visualize the swap
-        await new Promise((resolve) => setTimeout(resolve, delay));
-
-        // Remove highlights
-        setHighlightedIndices([]);
+        // Calling swap function to animate the column movement
+        await swap(arr, positions, i, minIndex, setValues, setPositions, setHighlightedIndices, delay);
       }
     }
-    
+  
     setIsSorting(false);
     setIsCompleted(true);
   };
 
   // Bubble Sort algorithm (Async)
-  const bubbleSort = async (arr) => {
-    let updatedArray = [...arr]; // Create a copy of the array for sorting
+  const bubbleSort = async (arr, positions, setValues, setPositions, setHighlightedIndices, delay) => {
+    let updatedArray = [...arr];
     let updatedPositions = [...positions];
-
+  
     for (let i = 0; i < updatedArray.length - 1; i++) {
       for (let j = 0; j < updatedArray.length - i - 1; j++) {
         if (
           (inputType === "numbers" && updatedArray[j] > updatedArray[j + 1]) ||
           (inputType === "alphabets" && updatedArray[j].localeCompare(updatedArray[j + 1]) > 0)
         ) {
-          // Swap the elements if they are out of order
-          [updatedArray[j], updatedArray[j + 1]] = [updatedArray[j + 1], updatedArray[j]];
-          [updatedPositions[j], updatedPositions[j + 1]] = [updatedPositions[j + 1], updatedPositions[j]];
-
-          // Highlighting swapped elements
-          setHighlightedIndices([j, j + 1]);
-
-          // Update the values and positions for visualization
-          setValues([...updatedArray]);
-          setPositions([...updatedPositions]);
-
-          // Delay to visualize the swap
-          await new Promise((resolve) => setTimeout(resolve, delay));
+          // Call swap function to animate the column movement and then swap values
+          await swap(updatedArray, updatedPositions, j, j + 1, setValues, setPositions, setHighlightedIndices, delay);
         }
       }
     }
-    setHighlightedIndices([]); // Clear highlighted indices
-    setIsSorting(false); // Sorting is complete
-    setIsCompleted(true); // Mark as completed
+  
+    setIsSorting(false);
+    setIsCompleted(true);
   };
 
   // Merge Sort algorithm (Async)
-  const mergeSort = async (arr) => {
+  const mergeSort = async (arr, positions, setValues, setPositions, setHighlightedIndices, delay) => {
     const merge = async (left, right) => {
       let result = [];
       let i = 0, j = 0;
@@ -215,9 +185,9 @@ export default function Visualizer() {
           j++;
         }
   
-        // Update visualization after each merge step
+        // Highlight merging elements and animate their positions
         setValues([...result, ...left.slice(i), ...right.slice(j)]);
-        setHighlightedIndices([i, j]); // Highlight merging elements
+        setHighlightedIndices([i, j]);
         await new Promise((resolve) => setTimeout(resolve, delay)); // Delay for visualization
       }
   
@@ -242,8 +212,8 @@ export default function Visualizer() {
   };
 
   // Insertion Sort algorithm (Async)
-  const insertionSort = async (arr) => {
-    let updatedArray = [...arr]; // Create a copy of the array for sorting
+  const insertionSort = async (arr, positions, setValues, setPositions, setHighlightedIndices, delay) => {
+    let updatedArray = [...arr];
     let updatedPositions = [...positions];
   
     for (let i = 1; i < updatedArray.length; i++) {
@@ -255,73 +225,77 @@ export default function Visualizer() {
         ((inputType === "numbers" && updatedArray[j] > key) ||
           (inputType === "alphabets" && updatedArray[j].localeCompare(key) > 0))
       ) {
-        updatedArray[j + 1] = updatedArray[j]; // Shift element to the right
+        updatedArray[j + 1] = updatedArray[j];
         updatedPositions[j + 1] = updatedPositions[j];
         j--;
   
-        // Highlight the moved elements
+        // Highlight and animate columns as they shift
         setHighlightedIndices([j + 1, i]);
-  
-        // Update the values and positions for visualization
         setValues([...updatedArray]);
         setPositions([...updatedPositions]);
-  
-        // Delay for visualization effect
-        await new Promise((resolve) => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay)); // Delay to animate
       }
-      updatedArray[j + 1] = key; // Insert the key at the correct position
-      updatedPositions[j + 1] = updatedPositions[i]; // Correct the positions
+  
+      updatedArray[j + 1] = key;
+      updatedPositions[j + 1] = updatedPositions[i];
+  
       setValues([...updatedArray]);
       setPositions([...updatedPositions]);
   
-      // Delay for visualization effect
-      await new Promise((resolve) => setTimeout(resolve, delay));
+      await new Promise((resolve) => setTimeout(resolve, delay)); // Delay to animate final placement
     }
   
-    setHighlightedIndices([]); // Clear highlighted indices
-    setIsSorting(false); // Sorting is complete
-    setIsCompleted(true); // Mark as completed
+    setIsSorting(false);
+    setIsCompleted(true);
   };
 
   // Quick Sort algorithm (Async)
-  const quickSort = async (arr) => {
+  const quickSort = async (arr, positions, setValues, setPositions, setHighlightedIndices, delay) => {
     const partition = async (arr, low, high) => {
       let pivot = arr[high];
       let i = low - 1;
-
+  
       for (let j = low; j < high; j++) {
         if (
           (inputType === "numbers" && arr[j] < pivot) ||
           (inputType === "alphabets" && arr[j].localeCompare(pivot) < 0)
         ) {
           i++;
-          [arr[i], arr[j]] = [arr[j], arr[i]]; // Swap arr[i] and arr[j]
-          setValues([...arr]); // Update the values state for visualization
-          setHighlightedIndices([i, j]); // Highlight the swapped elements
-          await new Promise((resolve) => setTimeout(resolve, delay)); // Delay for visualization
+          [arr[i], arr[j]] = [arr[j], arr[i]];
+          [positions[i], positions[j]] = [positions[j], positions[i]];
+  
+          // Highlight and animate columns during the swap
+          setValues([...arr]);
+          setPositions([...positions]);
+          setHighlightedIndices([i, j]);
+          await new Promise((resolve) => setTimeout(resolve, delay)); // Delay to animate
+  
+          setHighlightedIndices([]); // Reset highlights
         }
       }
-
-      [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]]; // Swap arr[i+1] and arr[high]
-      setValues([...arr]); // Update the values state for visualization
-      setHighlightedIndices([i + 1, high]); // Highlight the swapped elements
-      await new Promise((resolve) => setTimeout(resolve, delay)); // Delay for visualization
-
+  
+      [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
+      [positions[i + 1], positions[high]] = [positions[high], positions[i + 1]];
+  
+      setValues([...arr]);
+      setPositions([...positions]);
+  
       return i + 1;
     };
-
+  
     const sort = async (arr, low, high) => {
       if (low < high) {
-        let pi = await partition(arr, low, high); // Get pivot index
-        await sort(arr, low, pi - 1); // Recursively sort left part
-        await sort(arr, pi + 1, high); // Recursively sort right part
+        let pi = await partition(arr, low, high);
+        await sort(arr, low, pi - 1);
+        await sort(arr, pi + 1, high);
       }
     };
-
+  
+    setIsSorting(true);
     const arrCopy = [...arr];
-    await sort(arrCopy, 0, arrCopy.length - 1); // Start the quick sort
-    setIsSorting(false); // Sorting is complete
-    setIsCompleted(true); // Mark as completed
+    await sort(arrCopy, 0, arrCopy.length - 1);
+    setIsSorting(false);
+    setIsCompleted(true);
   };
 
   // Function to run the selected sorting algorithm
