@@ -94,36 +94,39 @@ export default function Visualizer() {
   }, [inputString, inputType]);
 
   // Sorting algorithms (Selection, Merge, Insertion, Quick)
-  const swap = (arr, positions, i, j) => {
+  const swap = async(arr, positions, i, j, setValues, setPositions, setHighlightedIndices, delay) => {
+    // Highlight elements being swapped
+    setHighlightedIndices([i,j]);
+ 
+    // Swap values in the array
     [arr[i], arr[j]] = [arr[j], arr[i]]; // Swap values
     [positions[i], positions[j]] = [positions[j], positions[i]]; // Swap positions
 
+    // Updating state to reflect changes
     setValues([...arr]);
     setPositions([...positions]);
+
+    // Waiting before resetting highlighting
+    await new Promise((resolve) => setTimeout(resolve, delay));
+    setHighlightedIndices([]);
   };
   
-  const selectionSort = async (arr) => {
-    let sortedArray = [...values];
-    let pos = [...positions];
-  
-    for (let i = 0; i < sortedArray.length - 1; i++) {
+  const selectionSort = async (arr, positions, setValues, setPositions, setHighlightedIndices, delay) => {
+
+    for (let i = 0; i < arr.length - 1; i++) {
       let minIndex = i;
-      for (let j = i + 1; j < sortedArray.length; j++) {
-        if (sortedArray[j] < sortedArray[minIndex]) {
+      for (let j = i + 1; j < arr.length; j++) {
+        if (arr[j] < arr[minIndex]) {
           minIndex = j;
         }
       }
   
       if (minIndex !== i) {
-        swap(sortedArray, pos, i, minIndex);  
-        setHighlightedIndices([i, minIndex]);
-        setValues([...sortedArray]); 
-        setPositions([...pos]); 
-        await new Promise((resolve) => setTimeout(resolve, delay));
+        await swap(arr, positions, i, minIndex, setValues, setPositions, setHighlightedIndices, delay);
       }
     }
   
-    setHighlightedIndices([]);
+//    setHighlightedIndices([]);
     setIsSorting(false);
     setIsCompleted(true);
   };
@@ -288,39 +291,43 @@ export default function Visualizer() {
   };
 
   // Function to run the selected sorting algorithm
-  const runSortingAlgorithm = () => {
+  const runSortingAlgorithm = async () => {
     if (values.length === 0) {
       alert("Please provide input values first!");
-      return; // Prevent sorting if there are no values
+      return;
     }
   
     if (!isSorting) {
       setIsSorting(true);
-      setIsCompleted(false); // Reset completion state
+      setIsCompleted(false);
   
-      // Pass a fresh copy of values to prevent state issues
-      const arrCopy = [...values];
+      // New copy of values and positions to prevent state mutations
+      let arrCopy = [...values];
+      let posCopy = [...positions];
   
       switch (sortingAlgorithm) {
         case "selection":
-          selectionSort(arrCopy);
+          await selectionSort(arrCopy, posCopy, setValues, setPositions, setHighlightedIndices, delay);
           break;
         case "merge":
-          mergeSort(arrCopy);
+          await mergeSort(arrCopy, posCopy, setValues, setPositions, setHighlightedIndices, delay);
           break;
         case "insertion":
-          insertionSort(arrCopy);
+          await insertionSort(arrCopy, posCopy, setValues, setPositions, setHighlightedIndices, delay);
           break;
         case "quick":
-          quickSort(arrCopy);
+          await quickSort(arrCopy, posCopy, setValues, setPositions, setHighlightedIndices, delay);
           break;
         case "bubble":
-          bubbleSort(arrCopy);
+          await bubbleSort(arrCopy, posCopy, setValues, setPositions, setHighlightedIndices, delay);
           break;
         default:
           console.warn("Unknown sorting algorithm:", sortingAlgorithm);
           break;
       }
+  
+      setIsSorting(false);
+      setIsCompleted(true);
     }
   };
 
@@ -371,8 +378,6 @@ export default function Visualizer() {
         <InputField 
           setValues={setValues} 
           inputType={inputType}
-          // setIsSorting={setIsSorting}  
-          // setIsCompleted={setIsCompleted}
         />
 
         {/* ActionButton for Start or Restart Sorting Button */}

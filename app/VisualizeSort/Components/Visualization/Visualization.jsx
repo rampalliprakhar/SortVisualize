@@ -18,30 +18,42 @@ const Visualization = ({ values, positions, visualizationType, normalizeValue, h
 
   return (
     <div className="flex justify-center mb-8 relative h-96 border-4 border-dashed border-blue-500 rounded-lg">
-    {visualizationType === "bars" ? (
-      <div className="relative flex items-end justify-center space-x-1 w-full max-w-3xl">
+      {visualizationType === "bars" ? (
+        <div className="relative flex-wrap items-start space-x-1 w-full max-w-3xl overflow-hidden">
           {values.map((value, index) => {
             const leftPosition = positions[index] * 35;
-
             const isHighlighted = highlightedIndices.includes(index);
 
             return (
               <div
                 key={index}
-                className={`absolute transition-all duration-500 ${
-                  isHighlighted ? 'bg-red-500' : ''
+                className={`bar absolute transition-transform duration-500 ${
+                  isHighlighted ? "bg-red-500" : ""
                 }`}
+                data-value={value}
                 style={{
-                  left: `${leftPosition}px`,
-                  bottom: 0,
-                  width: "30px",
-                  height: `${Math.max(value * 3, 20)}px`,
+                  alignItems: "center",
                   backgroundColor: isHighlighted ? "#ff5733" : barColor,
+                  bottom: 0,
                   color: textColor,
-                  transition: "left 0.5s ease-in-out",
+                  display: "flex",
+                  flexDirection: "column",
+                  height: `${Math.max(normalizeValue(value), 40)}px`,
+                  justifyContent: "flex-end",
+                  transform: `translateX(${leftPosition}px)`,
+                  transition: "transform 0.5s ease-in-out",
+                  width: "30px",
                 }}
               >
-                <span style={{ color: textColor, fontWeight: "bold", fontSize: "14px" }}>
+                <span
+                  style={{
+                    color: textColor,
+                    fontSize: "12px",
+                    fontWeight: "bold",
+                    marginBottom: "2px",
+                    textAlign: "center",
+                  }}
+                >
                   {value}
                 </span>
               </div>
@@ -57,18 +69,17 @@ const Visualization = ({ values, positions, visualizationType, normalizeValue, h
               return (
                 <div
                   key={index}
-                  className={`px-2 py-1 rounded-md transition-all duration-500 ${
+                  className={`px-2 py-1 rounded-md transition-transform duration-500 ${
                     isHighlighted ? "bg-red-500 text-white" : "bg-gray-200"
                   }`}
                   style={{
                     border: "1px solid #ccc",
-                    minWidth: "40px",
-                    padding: "8px 12px",
-                    textAlign: "center",
+                    minWidth: "20px",
+                    padding: "8px 10px",
+                    textAlign: "left",
                     fontSize: "clamp(12px, 3vw, 18px)", 
-                    transform: isHighlighted ? "scale(1.1)" : "scale(1)",
-                    transition: "transform 0.3s ease-in-out",
-                    whiteSpace: "nowrap",
+                    transform: `translateX(${positions[index] * 50}px)`, 
+                    transition: "transform 0.5s ease-in-out",
                   }}
                 >
                   {value}
