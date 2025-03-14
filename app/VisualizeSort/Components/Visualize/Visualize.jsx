@@ -94,36 +94,25 @@ export default function Visualizer() {
   }, [inputString, inputType]);
 
   // Sorting algorithms (Selection, Merge, Insertion, Quick)
-  const swap = async (arr, positions, i, j, setValues, setPositions, setHighlightedIndices, delay) => {
+  const swap = async (arr, pos, i, j, setValues, setPositions, setHighlightedIndices, delay) => {
     return new Promise((resolve) => {
-      // Highlight elements being swapped
-      setHighlightedIndices([i, j]);
+      setHighlightedIndices([i, j]); // Highlight the elements being swapped
   
-      const bar1 = document.querySelector(`[data-index="${i}"]`);
-      const bar2 = document.querySelector(`[data-index="${j}"]`);
+      // Animate the swap by updating positions first
+      setPositions((prevPositions) => {
+        const newPositions = [...prevPositions];
+        [newPositions[i], newPositions[j]] = [newPositions[j], newPositions[i]];
+        return newPositions;
+      });
   
-      if (bar1 && bar2) {
-        // Temporarily update to visually swap the elements
-        bar1.style.order = j;
-        bar2.style.order = i;
+      setTimeout(() => {
+        // Performing swap
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+        setValues([...arr]); // Update the values state
   
-        // Delay the actual state update
-        setTimeout(() => {
-          // Swap values and positions in the array
-          [arr[i], arr[j]] = [arr[j], arr[i]];
-          [positions[i], positions[j]] = [positions[j], positions[i]];
-  
-          // Update state to reflect the changes
-          setValues([...arr]);
-          setPositions([...positions]);
-  
-          // Reset the highlighted columns
-          setHighlightedIndices([]);
-          resolve();
-        }, delay);
-      } else {
+        setHighlightedIndices([]); // Remove highlight
         resolve();
-      }
+      }, delay);
     });
   };
   
@@ -137,7 +126,6 @@ export default function Visualizer() {
       }
   
       if (minIndex !== i) {
-        // Calling swap function to animate the column movement
         await swap(arr, positions, i, minIndex, setValues, setPositions, setHighlightedIndices, delay);
       }
     }
@@ -209,7 +197,7 @@ export default function Visualizer() {
     setValues(sortedArray);
     setIsSorting(false);
     setIsCompleted(true);
-  };
+  };  
 
   // Insertion Sort algorithm (Async)
   const insertionSort = async (arr, positions, setValues, setPositions, setHighlightedIndices, delay) => {
@@ -309,7 +297,6 @@ export default function Visualizer() {
       setIsSorting(true);
       setIsCompleted(false);
   
-      // New copy of values and positions to prevent state mutations
       let arrCopy = [...values];
       let posCopy = [...positions];
   
@@ -317,8 +304,8 @@ export default function Visualizer() {
         case "selection":
           await selectionSort(arrCopy, posCopy, setValues, setPositions, setHighlightedIndices, delay);
           break;
-        case "merge":
-          await mergeSort(arrCopy, posCopy, setValues, setPositions, setHighlightedIndices, delay);
+        case "bubble":
+          await bubbleSort(arrCopy, posCopy, setValues, setPositions, setHighlightedIndices, delay);
           break;
         case "insertion":
           await insertionSort(arrCopy, posCopy, setValues, setPositions, setHighlightedIndices, delay);
@@ -326,8 +313,8 @@ export default function Visualizer() {
         case "quick":
           await quickSort(arrCopy, posCopy, setValues, setPositions, setHighlightedIndices, delay);
           break;
-        case "bubble":
-          await bubbleSort(arrCopy, posCopy, setValues, setPositions, setHighlightedIndices, delay);
+        case "merge":
+          await mergeSort(arrCopy, posCopy, setValues, setPositions, setHighlightedIndices, delay);
           break;
         default:
           console.warn("Unknown sorting algorithm:", sortingAlgorithm);

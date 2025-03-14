@@ -1,6 +1,6 @@
 import React from "react";
 
-const Visualization = ({ values, positions, visualizationType, normalizeValue, highlightedIndices, theme = [] }) => {
+const Visualization = ({ values, positions, visualizationType, highlightedIndices, theme = [] }) => {
   const getThemeColors = (theme) => {
     switch (theme) {
       case "dark":
@@ -21,7 +21,7 @@ const Visualization = ({ values, positions, visualizationType, normalizeValue, h
       {visualizationType === "bars" ? (
         <div className="relative flex-wrap items-start space-x-1 w-full max-w-3xl overflow-hidden">
           {values.map((value, index) => {
-            //const leftPosition = positions[index] * 35;
+            const leftPosition = positions[index] * 40;
             const isHighlighted = highlightedIndices.includes(index);
             const maxHeight = Math.max(...values);
             const heightPercentage = (value / maxHeight) * 100;
@@ -29,7 +29,7 @@ const Visualization = ({ values, positions, visualizationType, normalizeValue, h
             return (
               <div
                 key={index}
-                className= "bar absolute"
+                className="bar absolute"
                 data-index={index}
                 style={{
                   alignItems: "center",
@@ -44,9 +44,9 @@ const Visualization = ({ values, positions, visualizationType, normalizeValue, h
                   height: `${Math.max(heightPercentage, 5)}%`,
                   justifyContent: "flex-end",
                   position: "absolute",
-                  transform: `translateX(${positions[index] * 35}px) rotateY(${isHighlighted ? "15deg" : "0deg"})`,
+                  transform: `translateX(${leftPosition}px)`,
                   transition: "transform 0.5s ease-in-out",
-                  width: "30px",
+                  width: "20px",
                 }}
               >
                 <span
@@ -81,7 +81,7 @@ const Visualization = ({ values, positions, visualizationType, normalizeValue, h
                     minWidth: "20px",
                     padding: "8px 10px",
                     textAlign: "center",
-                    fontSize: "clamp(12px, 3vw, 18px)", 
+                    fontSize: "clamp(12px, 3vw, 18px)",
                     order: positions[index], 
                     transition: "order 0.5s ease-in-out",
                   }}
