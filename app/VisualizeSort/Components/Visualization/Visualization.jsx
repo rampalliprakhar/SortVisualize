@@ -21,7 +21,7 @@ const Visualization = ({ values, positions, visualizationType, highlightedIndice
       {visualizationType === "bars" ? (
         <div className="relative flex-wrap items-start space-x-1 w-full max-w-3xl overflow-hidden">
           {values.map((value, index) => {
-            const leftPosition = positions[index] * 40;
+            const leftPosition = (positions[index] * (window.innerWidth < 640 ? 30 : 40));
             const isHighlighted = highlightedIndices.includes(index);
             const maxHeight = Math.max(...values);
             const heightPercentage = (value / maxHeight) * 100;
@@ -39,20 +39,20 @@ const Visualization = ({ values, positions, visualizationType, highlightedIndice
                   color: textColor,
                   display: "flex",
                   flexDirection: "column",
-                  fontSize: "12px",
+                  fontSize: "clamp(8px, 2vw, 12px)",
                   fontWeight: "bold",
                   height: `${Math.max(heightPercentage, 5)}%`,
                   justifyContent: "flex-end",
                   position: "absolute",
                   transform: `translateX(${leftPosition}px)`,
                   transition: "transform 0.5s ease-in-out",
-                  width: "20px",
+                  width: window.innerWidth < 640 ? "16px" : "20px",
                 }}
               >
                 <span
                   style={{
                     color: textColor,
-                    fontSize: "12px",
+                    fontSize: "clamp(8px, 2vw, 12px)",
                     fontWeight: "bold",
                     marginBottom: "2px",
                     textAlign: "center",
@@ -65,24 +65,24 @@ const Visualization = ({ values, positions, visualizationType, highlightedIndice
           })}
         </div>
       ) : (
-        <div className="w-full max-w-3xl h-auto flex justify-center items-center border-4 border-dashed border-blue-500 rounded-lg p-4 overflow-x-auto">
-          <div className="text-lg font-bold flex flex-nowrap gap-2 justify-center">
+        <div className="w-full max-w-3xl h-auto flex justify-center items-center rounded-lg p-2 overflow-x-auto">
+          <div className="text-lg font-bold flex flex-nowrap gap-1 md:gap-2 justify-center">
             {values.map((value, index) => {
               const isHighlighted = highlightedIndices.includes(index);
 
               return (
                 <div
                   key={index}
-                  className={`px-2 py-1 rounded-md transition-transform duration-500 ${
+                  className={`px-1 md:px-2 py-1 rounded-md transition-transform duration-500 ${
                     isHighlighted ? "bg-red-500 text-white" : "bg-gray-200"
                   }`}
                   style={{
                     border: "1px solid #ccc",
-                    minWidth: "20px",
-                    padding: "8px 10px",
+                    minWidth: "clamp(16px, 4vw, 20px)",
+                    padding: "clamp(4px, 2vw, 8px)",
                     textAlign: "center",
-                    fontSize: "clamp(12px, 3vw, 18px)",
-                    order: positions[index], 
+                    fontSize: "clamp(10px, 2.5vw, 18px)",
+                    order: positions[index],
                     transition: "order 0.5s ease-in-out",
                   }}
                 >
