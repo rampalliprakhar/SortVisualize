@@ -1,3 +1,4 @@
+"use client"
 import React from 'react'
 
 const SortControls = ({ sortingAlgorithm, setSortingAlgorithm, inputType, setInputType, setDelay, delay, visualizationType, setVisualizationType, theme, setTheme }) => {

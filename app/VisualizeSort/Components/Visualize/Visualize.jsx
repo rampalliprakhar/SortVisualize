@@ -5,6 +5,8 @@ import SortControls from "../Controls/SortControls";
 import Visualization from "../Visualization/Visualization";
 import ActionButton from "../ActionButton/ActionButton";
 import InputField from "../InputField/InputField";
+import AudioManager from "../AudioManager";
+import PerformanceMetrics from "../PerformanceMetrics";
 
 export default function Visualizer() {
   // State to hold the values that will be sorted
@@ -36,6 +38,27 @@ export default function Visualizer() {
   const [highlightedIndices, setHighlightedIndices] = useState([]);
 
   const [theme, setTheme] = useState("default");
+
+  const [audioManager, setAudioManager] = useState(null);
+
+  const [metrics, setMetrics] = useState({
+    comparisons: 0,
+    swaps: 0,
+    executionTime: 0,
+    spaceComplexity: 'n'
+  });
+
+  useEffect(() => {
+    setAudioManager(new AudioManager());
+  }, []);
+
+  const compare = (a, b) => {
+    setMetrics(prev => ({...prev, comparisons: prev.comparisons + 1}));
+    if (audioManager) {
+      audioManager.playSound(a, 'compare');
+    }
+    return inputType === "numbers" ? a - b : String(a).localeCompare(String(b));
+  };
 
   useEffect(() => {
     setPositions(values.map((_, index) => index)); // Reset positions when values change
@@ -96,6 +119,13 @@ export default function Visualizer() {
   // Sorting algorithms (Selection, Merge, Insertion, Quick)
   const swap = async (arr, pos, i, j, setValues, setPositions, setHighlightedIndices, delay) => {
     return new Promise((resolve) => {
+      metrics.swaps++;
+      setMetrics(prev => ({...prev, swaps: prev.swaps + 1}));
+
+      if (audioManager) {
+        audioManager.playSound(arr[i], 'swap');
+      }
+
       setHighlightedIndices([i, j]); // Highlight the elements being swapped
   
       // Animate the swap by updating positions first
@@ -120,39 +150,25 @@ export default function Visualizer() {
     for (let i = 0; i < arr.length - 1; i++) {
       let minIndex = i;
       for (let j = i + 1; j < arr.length; j++) {
-        if (arr[j] < arr[minIndex]) {
+        if (compare(arr[j], arr[minIndex]) < 0) {
           minIndex = j;
         }
       }
-  
       if (minIndex !== i) {
         await swap(arr, positions, i, minIndex, setValues, setPositions, setHighlightedIndices, delay);
       }
     }
-  
-    setIsSorting(false);
-    setIsCompleted(true);
   };
 
   // Bubble Sort algorithm (Async)
   const bubbleSort = async (arr, positions, setValues, setPositions, setHighlightedIndices, delay) => {
-    let updatedArray = [...arr];
-    let updatedPositions = [...positions];
-  
-    for (let i = 0; i < updatedArray.length - 1; i++) {
-      for (let j = 0; j < updatedArray.length - i - 1; j++) {
-        if (
-          (inputType === "numbers" && updatedArray[j] > updatedArray[j + 1]) ||
-          (inputType === "alphabets" && updatedArray[j].localeCompare(updatedArray[j + 1]) > 0)
-        ) {
-          // Call swap function to animate the column movement and then swap values
-          await swap(updatedArray, updatedPositions, j, j + 1, setValues, setPositions, setHighlightedIndices, delay);
+    for (let i = 0; i < arr.length - 1; i++) {
+      for (let j = 0; j < arr.length - i - 1; j++) {
+        if (compare(arr[j], arr[j + 1]) > 0) {
+          await swap(arr, positions, j, j + 1, setValues, setPositions, setHighlightedIndices, delay);
         }
       }
     }
-  
-    setIsSorting(false);
-    setIsCompleted(true);
   };
 
   // Merge Sort algorithm (Async)
@@ -160,81 +176,52 @@ export default function Visualizer() {
     const merge = async (left, right) => {
       let result = [];
       let i = 0, j = 0;
-  
       while (i < left.length && j < right.length) {
-        if (
-          (inputType === "numbers" && left[i] < right[j]) ||
-          (inputType === "alphabets" && left[i].localeCompare(right[j]) < 0)
-        ) {
+        if (compare(left[i], right[j]) <= 0) {
           result.push(left[i]);
           i++;
         } else {
           result.push(right[j]);
           j++;
         }
-  
-        // Highlight merging elements and animate their positions
         setValues([...result, ...left.slice(i), ...right.slice(j)]);
         setHighlightedIndices([i, j]);
-        await new Promise((resolve) => setTimeout(resolve, delay)); // Delay for visualization
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
-  
       return [...result, ...left.slice(i), ...right.slice(j)];
     };
   
     const sort = async (arr) => {
       if (arr.length <= 1) return arr;
-  
       const mid = Math.floor(arr.length / 2);
       const left = await sort(arr.slice(0, mid));
       const right = await sort(arr.slice(mid));
-  
       return await merge(left, right);
     };
   
-    setIsSorting(true);
     const sortedArray = await sort([...arr]);
     setValues(sortedArray);
-    setIsSorting(false);
-    setIsCompleted(true);
-  };  
+  };
 
   // Insertion Sort algorithm (Async)
   const insertionSort = async (arr, positions, setValues, setPositions, setHighlightedIndices, delay) => {
-    let updatedArray = [...arr];
-    let updatedPositions = [...positions];
-  
-    for (let i = 1; i < updatedArray.length; i++) {
-      let key = updatedArray[i];
+    for (let i = 1; i < arr.length; i++) {
+      let key = arr[i];
       let j = i - 1;
-  
-      while (
-        j >= 0 &&
-        ((inputType === "numbers" && updatedArray[j] > key) ||
-          (inputType === "alphabets" && updatedArray[j].localeCompare(key) > 0))
-      ) {
-        updatedArray[j + 1] = updatedArray[j];
-        updatedPositions[j + 1] = updatedPositions[j];
+      while (j >= 0 && compare(arr[j], key) > 0) {
+        arr[j + 1] = arr[j];
+        positions[j + 1] = positions[j];
         j--;
-  
-        // Highlight and animate columns as they shift
         setHighlightedIndices([j + 1, i]);
-        setValues([...updatedArray]);
-        setPositions([...updatedPositions]);
-        await new Promise((resolve) => setTimeout(resolve, delay)); // Delay to animate
+        setValues([...arr]);
+        setPositions([...positions]);
+        await new Promise(resolve => setTimeout(resolve, delay));
       }
-  
-      updatedArray[j + 1] = key;
-      updatedPositions[j + 1] = updatedPositions[i];
-  
-      setValues([...updatedArray]);
-      setPositions([...updatedPositions]);
-  
-      await new Promise((resolve) => setTimeout(resolve, delay)); // Delay to animate final placement
+      arr[j + 1] = key;
+      positions[j + 1] = positions[i];
+      setValues([...arr]);
+      setPositions([...positions]);
     }
-  
-    setIsSorting(false);
-    setIsCompleted(true);
   };
 
   // Quick Sort algorithm (Async)
@@ -242,32 +229,13 @@ export default function Visualizer() {
     const partition = async (arr, low, high) => {
       let pivot = arr[high];
       let i = low - 1;
-  
       for (let j = low; j < high; j++) {
-        if (
-          (inputType === "numbers" && arr[j] < pivot) ||
-          (inputType === "alphabets" && arr[j].localeCompare(pivot) < 0)
-        ) {
+        if (compare(arr[j], pivot) < 0) {
           i++;
-          [arr[i], arr[j]] = [arr[j], arr[i]];
-          [positions[i], positions[j]] = [positions[j], positions[i]];
-  
-          // Highlight and animate columns during the swap
-          setValues([...arr]);
-          setPositions([...positions]);
-          setHighlightedIndices([i, j]);
-          await new Promise((resolve) => setTimeout(resolve, delay)); // Delay to animate
-  
-          setHighlightedIndices([]); // Reset highlights
+          await swap(arr, positions, i, j, setValues, setPositions, setHighlightedIndices, delay);
         }
       }
-  
-      [arr[i + 1], arr[high]] = [arr[high], arr[i + 1]];
-      [positions[i + 1], positions[high]] = [positions[high], positions[i + 1]];
-  
-      setValues([...arr]);
-      setPositions([...positions]);
-  
+      await swap(arr, positions, i + 1, high, setValues, setPositions, setHighlightedIndices, delay);
       return i + 1;
     };
   
@@ -278,12 +246,22 @@ export default function Visualizer() {
         await sort(arr, pi + 1, high);
       }
     };
-  
-    setIsSorting(true);
-    const arrCopy = [...arr];
-    await sort(arrCopy, 0, arrCopy.length - 1);
-    setIsSorting(false);
-    setIsCompleted(true);
+    await sort(arr, 0, arr.length - 1);
+  };
+
+  const getSpaceComplexity = (algorithm) => {
+    switch (algorithm) {
+      case "merge":
+        return "n";
+      case "quick":
+        return "log n";
+      case "selection":
+      case "bubble":
+      case "insertion":
+        return "1";
+      default:
+        return "n";
+    }
   };
 
   // Function to run the selected sorting algorithm
@@ -294,11 +272,15 @@ export default function Visualizer() {
     }
   
     if (!isSorting) {
-      setIsSorting(true);
-      setIsCompleted(false);
-  
       let arrCopy = [...values];
       let posCopy = [...positions];
+
+      setIsSorting(true);
+      setIsCompleted(false);
+
+      // Reset and start tracking metrics
+      setMetrics(prev => ({...prev, comparisons: 0, swaps: 0}));
+      const startTime = performance.now();
   
       switch (sortingAlgorithm) {
         case "selection":
@@ -320,7 +302,14 @@ export default function Visualizer() {
           console.warn("Unknown sorting algorithm:", sortingAlgorithm);
           break;
       }
-  
+
+      const endTime = performance.now();
+      setMetrics(prev => ({
+        ...prev,
+        executionTime: Math.round(endTime - startTime),
+        spaceComplexity: getSpaceComplexity(sortingAlgorithm),
+      }))
+
       setIsSorting(false);
       setIsCompleted(true);
     }
@@ -356,6 +345,11 @@ export default function Visualizer() {
       <div className="bg-white p-6 rounded-lg shadow-xl max-w-3xl w-full">
         <h1 className="text-4xl font-extrabold text-blue-500 text-center mb-8">Sorting Visualizer</h1>
         
+        {/* Performance Metrics */}
+        <div className="mb-4">
+          <PerformanceMetrics metrics={metrics} />
+        </div>
+
         {/*Sorting Controls */}
         <SortControls
           sortingAlgorithm={sortingAlgorithm}
