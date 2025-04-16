@@ -2,19 +2,6 @@ export default class AudioManager {
     constructor() {
         if (typeof window !== 'undefined') {
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-            this.setupAudioInput();
-        }
-    }
-
-    async setupAudioInput() {
-        try {
-            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-            const source = this.audioContext.createMediaStreamSource(stream);
-            this.analyzer = this.audioContext.createAnalyser();
-            source.connect(analyzer);
-            this.analyzer = analyzer;
-        } catch (error) {
-            console.log("Defult synthesized audio in use!!")
         }
     }
 
@@ -34,10 +21,8 @@ export default class AudioManager {
             const osc = this.audioContext.createOscillator();
             const gain = this.audioContext.createGain();
             
-            // Map array values to musical scale
             const freq = baseFreq * multiplier * (1 + (normalizedValue % 26) / 26);
             osc.frequency.value = freq;
-            // osc.frequency.value = baseFreq * multiplier * (1 + value/100);
             osc.type = operation === 'compare' ? 'sine' : 'triangle';
             
             osc.connect(gain);
