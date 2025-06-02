@@ -1,16 +1,38 @@
 import React from "react";
 
-const Visualization = ({ values, positions, visualizationType, highlightedIndices, theme = [] }) => {
+const Visualization = ({
+  values,
+  positions,
+  visualizationType,
+  highlightedIndices,
+  theme = [],
+}) => {
   const getThemeColors = (theme) => {
     switch (theme) {
       case "dark":
-        return { barColor: "#3498db", textColor: "#ecf0f1", bgColor: "#2c3e50" };
+        return {
+          barColor: "#3498db",
+          textColor: "#ecf0f1",
+          bgColor: "#2c3e50",
+        };
       case "pastel":
-        return { barColor: "#f8b195", textColor: "#355c7d", bgColor: "#f8f1f1" };
+        return {
+          barColor: "#f8b195",
+          textColor: "#355c7d",
+          bgColor: "#f8f1f1",
+        };
       case "neon":
-        return { barColor: "#39ff14", textColor: "#ff00ff", bgColor: "#000000" };
+        return {
+          barColor: "#39ff14",
+          textColor: "#ff00ff",
+          bgColor: "#000000",
+        };
       default:
-        return { barColor: "#00ff00", textColor: "#202020", bgColor: "#ffffff" };
+        return {
+          barColor: "#00ff00",
+          textColor: "#202020",
+          bgColor: "#ffffff",
+        };
     }
   };
 
@@ -21,7 +43,8 @@ const Visualization = ({ values, positions, visualizationType, highlightedIndice
       {visualizationType === "bars" ? (
         <div className="relative flex-wrap items-start space-x-1 w-full max-w-3xl overflow-hidden">
           {values.map((value, index) => {
-            const leftPosition = (positions[index] * (window.innerWidth < 640 ? 30 : 40));
+            const leftPosition =
+              positions[index] * (window.innerWidth < 640 ? 30 : 40);
             const isHighlighted = highlightedIndices.includes(index);
             const maxHeight = Math.max(...values);
             const heightPercentage = (value / maxHeight) * 100;
