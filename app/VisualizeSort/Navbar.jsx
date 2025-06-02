@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function Navbar() {
   return (
@@ -6,7 +6,9 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto flex justify-between items-center px-4">
         <div className="text-xl font-bold">
           <Link href="/">
-            <span className="text-white hover:text-blue-200">Sorting Visualizer</span>
+            <span className="text-white hover:text-blue-200">
+              Sorting Visualizer
+            </span>
           </Link>
         </div>
         <div className="space-x-4">

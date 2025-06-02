@@ -19,18 +19,18 @@ const InputField = ({ setValues, inputType }) => {
         .split(",")
         .map((val) => parseInt(val.trim(), 10))
         .filter((val) => !isNaN(val));
-        if(newValues.length === 0){
-          setErrorMessage("Please enter valid numbers!!");
-        } else {
-          setValues(newValues);
-        }
+      if (newValues.length === 0) {
+        setErrorMessage("Please enter valid numbers!!");
+      } else {
+        setValues(newValues);
+      }
     } else {
       // If inputType is 'alphabets', convert input to an array of characters
       newValues = userInput
         .split(",")
         .map((val) => val.trim().toUpperCase())
         .filter((val) => /^[A-Z]$/.test(val));
-      if (newValues.length === 0){
+      if (newValues.length === 0) {
         setErrorMessage("Please enter valid alphabets!!");
       } else {
         setValues(newValues);
@@ -44,14 +44,16 @@ const InputField = ({ setValues, inputType }) => {
       window.generateRandomNumbers();
     }
   };
- 
+
   return (
     <div className="flex flex-col items-center mb-4 space-y-4">
       <div className="flex space-x-2">
         <input
           type="text"
           className="py-2 px-4 rounded-md border border-gray-300"
-          placeholder={`Enter ${inputType === "numbers" ? "numbers" : "letters"} separated by commas`}
+          placeholder={`Enter ${
+            inputType === "numbers" ? "numbers" : "letters"
+          } separated by commas`}
           value={userInput}
           onChange={handleChange}
         />
